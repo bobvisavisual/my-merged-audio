@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import sharp from 'sharp';
 import { pipeline } from 'stream/promises';
 import ffmpeg from 'fluent-ffmpeg';
