@@ -1,3 +1,4 @@
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 import sharp from 'sharp';
 import { pipeline } from 'stream/promises';
 import ffmpeg from 'fluent-ffmpeg';
@@ -12,7 +13,7 @@ export default async function handler(req, res) {
   if (!voiceUrl || !musicUrl) {
     console.error("Missing required parameters.");
     return res.status(400).send('Missing voiceUrl or musicUrl');
-  
+  }
 
   try {
     const voiceStream = await fetch(voiceUrl).then(r => r.body);
