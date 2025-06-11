@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: merge-audio-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start

@@ -1,17 +1,13 @@
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-// import sharp from 'sharp';
-import { pipeline } from 'stream/promises';
+import express from 'express';
+import fetch from 'node-fetch';
 import ffmpeg from 'fluent-ffmpeg';
 
-export default async function handler(req, res) {
-  const { voiceUrl, musicUrl, musicVolume = 0.3 } = req.method === 'POST' ? req.body : req.query;
+const app = express();
 
-  console.log("Voice URL:", voiceUrl);
-  console.log("Music URL:", musicUrl);
-  console.log("Volume:", musicVolume);
+app.get('/merge', async (req, res) => {
+  const { voiceUrl, musicUrl, musicVolume = 0.3 } = req.query;
 
   if (!voiceUrl || !musicUrl) {
-    console.error("Missing required parameters.");
     return res.status(400).send('Missing voiceUrl or musicUrl');
   }
 
@@ -19,20 +15,28 @@ export default async function handler(req, res) {
     const voiceStream = await fetch(voiceUrl).then(r => r.body);
     const musicStream = await fetch(musicUrl).then(r => r.body);
 
-    const merged = ffmpeg()
+    res.setHeader('Content-Type', 'audio/mpeg');
+
+    ffmpeg()
       .input(voiceStream).inputFormat('mp3')
       .input(musicStream).inputFormat('mp3')
       .complexFilter([
         { filter: 'volume', options: '1', inputs: '0:a', outputs: 'v1' },
         { filter: 'volume', options: musicVolume.toString(), inputs: '1:a', outputs: 'v2' },
-        { filter: 'amix', options: 'inputs=2:duration=first', inputs: ['v1', 'v2'], outputs: 'output' },
+        { filter: 'amix', options: 'inputs=2:duration=first', inputs: ['v1', 'v2'], outputs: 'output' }
       ], 'output')
-      .outputFormat('mp3');
+      .outputFormat('mp3')
+      .on('error', err => {
+        console.error('FFmpeg error:', err);
+        res.status(500).send('Error merging audio');
+      })
+      .pipe(res, { end: true });
 
-    res.setHeader('Content-Type', 'audio/mpeg');
-    merged.pipe(res);
   } catch (err) {
-    console.error("Merge error:", err);
-    return res.status(500).send("Error processing audio");
+    console.error("Server error:", err);
+    res.status(500).send('Internal server error');
   }
-}
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Audio merge API running on port ${PORT}`));
