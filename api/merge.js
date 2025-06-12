@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 import ffmpeg from 'fluent-ffmpeg';
 
 const app = express();
+app.use(express.json());
 
 app.post('/merge', async (req, res) => {
   const { voiceUrl, musicUrl, musicVolume = 0.3 } = req.body;
