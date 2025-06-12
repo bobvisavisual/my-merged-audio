@@ -1,6 +1,4 @@
 import express from 'express';
-app.use(express.json());
-
 import fetch from 'node-fetch';
 import ffmpeg from 'fluent-ffmpeg';
 
