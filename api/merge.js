@@ -1,11 +1,13 @@
 import express from 'express';
+app.use(express.json());
+
 import fetch from 'node-fetch';
 import ffmpeg from 'fluent-ffmpeg';
 
 const app = express();
 
 app.post('/merge', async (req, res) => {
-  const { voiceUrl, musicUrl, musicVolume = 0.3 } = req.query;
+  const { voiceUrl, musicUrl, musicVolume = 0.3 } = req.body;
 
   if (!voiceUrl || !musicUrl) {
     return res.status(400).send('Missing voiceUrl or musicUrl');
