@@ -4,7 +4,7 @@ import ffmpeg from 'fluent-ffmpeg';
 
 const app = express();
 
-app.get('/merge', async (req, res) => {
+app.post('/merge', async (req, res) => {
   const { voiceUrl, musicUrl, musicVolume = 0.3 } = req.query;
 
   if (!voiceUrl || !musicUrl) {
